@@ -2,7 +2,7 @@
 
 - label: "トップページ"
   link: "/"
-- label: "[WIP] はじめに"
+- label: "はじめに"
   link: "/intro"
 - label: "演習用の環境を構築する"
   link: "/chapters/setup"

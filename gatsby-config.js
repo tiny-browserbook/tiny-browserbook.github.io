@@ -4,7 +4,7 @@ module.exports = {
     defaultTitle: "ちいさな Web ブラウザを作ってみよう",
     siteTitleShort: "ちいさな Web ブラウザを作ってみよう",
     siteDescription:
-      "本 Web サイトはセキュリティ・キャンプ全国大会 2021 オンラインの講義「ちいさなWebブラウザを作ってみよう」の事前学習資料です。ちいさな Web ブラウザを作ることを通して現代の Web ブラウザの仕組みを学びましょう。",
+      "本オンラインブックはセキュリティ・キャンプ全国大会 2021 オンラインの講義「ちいさなWebブラウザを作ってみよう」の事前学習資料です。ちいさな Web ブラウザを作ることを通して現代の Web ブラウザの仕組みを学びましょう。",
     siteUrl: "https://browserbook.shift-js.info",
     siteAuthor: "@lmt_swallow",
     siteImage: "/banner.png",
