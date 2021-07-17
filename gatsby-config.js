@@ -15,12 +15,35 @@ module.exports = {
   flags: { PRESERVE_WEBPACK_CACHE: true },
   plugins: [
     {
+      resolve: `gatsby-plugin-mdx`,
+      options: {
+        extensions: [`.mdx`, `.md`],
+        remarkPlugins: [require("remark-emoji")],
+        gatsbyRemarkPlugins: [
+          `gatsby-remark-autolink-headers`,
+          `gatsby-remark-embedder`,
+          {
+            resolve: `gatsby-remark-images`,
+            options: {
+              maxWidth: 960,
+              withWebp: true,
+              linkImagesToOriginal: false,
+            },
+          },
+          `gatsby-remark-responsive-iframe`,
+          `gatsby-remark-copy-linked-files`,
+        ],
+        plugins: [`gatsby-remark-autolink-headers`, `gatsby-remark-images`],
+      },
+    },
+    {
       resolve: "@rocketseat/gatsby-theme-docs",
       options: {
         configPath: "src/config",
         docsPath: "src/docs",
         repositoryUrl: "https://github.com/lmt-swallow/browserbook",
         baseDir: "",
+        withMdx: false,
       },
     },
     "gatsby-plugin-sitemap",
