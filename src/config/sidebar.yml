@@ -4,7 +4,7 @@
   link: "/"
 - label: "[WIP] はじめに"
   link: "/intro"
-- label: "[WIP] 演習環境を構築する"
+- label: "演習用の環境を構築する"
   link: "/chapters/setup"
 - label: "Part 1: 旅のはじまり"
   items:

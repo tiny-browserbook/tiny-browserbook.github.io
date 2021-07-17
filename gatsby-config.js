@@ -30,6 +30,7 @@ module.exports = {
               linkImagesToOriginal: false,
             },
           },
+          `gatsby-remark-numbered-footnotes`,
           `gatsby-remark-responsive-iframe`,
           `gatsby-remark-copy-linked-files`,
         ],
