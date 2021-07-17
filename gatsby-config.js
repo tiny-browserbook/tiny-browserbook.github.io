@@ -12,7 +12,6 @@ module.exports = {
     themeColor: "#8257E6",
     basePath: "/",
   },
-  pathPrefix: "/2nd",
   flags: { PRESERVE_WEBPACK_CACHE: true },
   plugins: [
     {
