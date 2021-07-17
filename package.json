@@ -1,0 +1,41 @@
+{
+  "name": "browserbook",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "MIT",
+  "starter-name": "gatsby-starter-rocket-docs",
+  "dependencies": {
+    "@rocketseat/gatsby-theme-docs": "^2.3.1",
+    "gatsby": "^3.0.4",
+    "gatsby-plugin-canonical-urls": "^3.0.0",
+    "gatsby-plugin-google-analytics": "^3.0.0",
+    "gatsby-plugin-manifest": "^3.0.0",
+    "gatsby-plugin-offline": "^4.0.0",
+    "gatsby-plugin-remove-trailing-slashes": "^3.0.0",
+    "gatsby-plugin-sitemap": "^3.0.0",
+    "prop-types": "^15.7.2",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "styled": "^1.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.28.2",
+    "@typescript-eslint/parser": "^4.28.2",
+    "eslint": "^7.30.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "gatsby-plugin-typegen": "^2.2.4",
+    "typescript": "^4.3.5"
+  },
+  "keywords": [],
+  "scripts": {
+    "build": "gatsby build",
+    "start": "gatsby develop",
+    "serve": "gatsby serve",
+    "lint": "eslint . --ext .tsx --ext .ts",
+    "lint:fix": "eslint . --fix --ext .tsx --ext .ts",
+    "clean": "gatsby clean"
+  }
+}

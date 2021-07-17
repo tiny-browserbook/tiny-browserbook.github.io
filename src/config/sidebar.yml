@@ -1,0 +1,41 @@
+# Sidebar navigation
+
+- label: "トップページ"
+  link: "/"
+- label: "[WIP] はじめに"
+  link: "/intro"
+- label: "[WIP] 演習環境を構築する"
+  link: "/chapters/setup"
+- label: "Part 1: 旅のはじまり"
+  items:
+    - label: "[WIP] 基礎的なコンセプトを学ぶ"
+      link: "/chapters/basic-concepts"
+    - label: "[WIP] HTML を取り扱う"
+      link: "/chapters/parsing-html"
+    - label: "[WIP] CSS を取り扱う"
+      link: "/chapters/parsing-css"
+    - label: "[WIP] レンダリングツリーを作る"
+      link: "/chapters/building-rendering-tree"
+    - label: "[WIP] レンダリングする"
+      link: "/chapters/rendering"
+- label: "Part 2: 動的な Web に向けて"
+  items:
+    - label: "[WIP] JavaScript の扱いを考える"
+      link: "/chapters/about-js"
+    - label: "[WIP] V8 を組み込む"
+      link: "/chapters/integrating-v8"
+    - label: "[WIP] イベントハンドラを捌く"
+      link: "/chapters/handling-events"
+    - label: "[WIP] ミニ DOM API を作る"
+      link: "/chapters/building-dom-api"
+    - label: "[WIP] ミニ Fetch API を作る"
+      link: "/chapters/building-fetch-api"
+- label: "Part 3: 安全な Web にむけて"
+  items:
+    - label: "[WIP] ブラウザとセキュリティ"
+      link: "/chapters/browser-security"
+
+- label: その他
+  items:
+    - label: "著者の Twitter"
+      link: https://twitter.com/lmt_swallow

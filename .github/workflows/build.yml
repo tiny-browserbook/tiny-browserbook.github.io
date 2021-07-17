@@ -1,0 +1,33 @@
+name: Build the site
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build pages
+    runs-on: ubuntu-latest
+    steps:
+      # set up the env
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      # build the site
+      - name: yarn install
+        run: yarn install
+      - name: run build
+        run: yarn build --prefix-paths
+      - name: Create a directory for distribution files
+        run: |
+          mkdir ./public/dist
+
+      # publish it
+      - name: Publish the site
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
