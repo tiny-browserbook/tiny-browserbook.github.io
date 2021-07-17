@@ -27,7 +27,7 @@ workbox.core.clientsClaim();
  */
 self.__precacheManifest = [
   {
-    "url": "webpack-runtime-54bbb264f1cd03a0931e.js"
+    "url": "webpack-runtime-18c860f2224ae0d5a674.js"
   },
   {
     "url": "framework-56f81176069f8668f3c8.js"
@@ -36,11 +36,11 @@ self.__precacheManifest = [
     "url": "f0e45107-70db7e9dc07074b2562b.js"
   },
   {
-    "url": "app-4befcb7a875fe2b17e62.js"
+    "url": "app-fbce3912509879fb5fd0.js"
   },
   {
     "url": "offline-plugin-app-shell-fallback/index.html",
-    "revision": "a507b81495a947dd379f79ca230a4e05"
+    "revision": "24085a78244c1caa30226e008811b503"
   },
   {
     "url": "component---cache-caches-gatsby-plugin-offline-app-shell-js-fe003fbc462c6e4bcf6f.js"
@@ -51,7 +51,7 @@ self.__precacheManifest = [
   },
   {
     "url": "page-data/app-data.json",
-    "revision": "c06fcca5579ed1126435a22b2e7ac4ba"
+    "revision": "4ec59085a10e92cffa54589403595a20"
   },
   {
     "url": "polyfill-05d7c93801ba8804ebce.js"
@@ -141,12 +141,12 @@ const navigationRoute = new NavigationRoute(async ({ event }) => {
   lastNavigationRequest = event.request.url
 
   let { pathname } = new URL(event.request.url)
-  pathname = pathname.replace(new RegExp(`^/2nd`), ``)
+  pathname = pathname.replace(new RegExp(`^`), ``)
 
   // Check for resources + the app bundle
   // The latter may not exist if the SW is updating to a new version
   const resources = await idbKeyval.get(`resources:${pathname}`)
-  if (!resources || !(await caches.match(`/2nd/app-4befcb7a875fe2b17e62.js`))) {
+  if (!resources || !(await caches.match(`/app-fbce3912509879fb5fd0.js`))) {
     return await fetch(event.request)
   }
 
@@ -159,7 +159,7 @@ const navigationRoute = new NavigationRoute(async ({ event }) => {
     }
   }
 
-  const offlineShell = `/2nd/offline-plugin-app-shell-fallback/index.html`
+  const offlineShell = `/offline-plugin-app-shell-fallback/index.html`
   const offlineShellWithKey = workbox.precaching.getCacheKeyForURL(offlineShell)
   return await caches.match(offlineShellWithKey)
 })
