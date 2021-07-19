@@ -4,7 +4,6 @@
 <url> <loc>https://browserbook.shift-js.info/faq</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://browserbook.shift-js.info/intro</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://browserbook.shift-js.info/chapters/about-js</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://browserbook.shift-js.info/chapters/basic-concepts</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://browserbook.shift-js.info/chapters/browser-security</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://browserbook.shift-js.info/chapters/building-dom-api</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://browserbook.shift-js.info/chapters/building-fetch-api</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
@@ -14,5 +13,6 @@
 <url> <loc>https://browserbook.shift-js.info/chapters/parsing-css</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://browserbook.shift-js.info/chapters/parsing-html</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://browserbook.shift-js.info/chapters/rendering</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
+<url> <loc>https://browserbook.shift-js.info/chapters/basic-concepts</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://browserbook.shift-js.info/chapters/setup</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 </urlset>
