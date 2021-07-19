@@ -8,7 +8,7 @@
   link: "/chapters/setup"
 - label: "Part 1: 旅のはじまり"
   items:
-    - label: "[WIP] 基礎的なコンセプトを学ぶ"
+    - label: "前提を整理する"
       link: "/chapters/basic-concepts"
     - label: "[WIP] HTML を取り扱う"
       link: "/chapters/parsing-html"
