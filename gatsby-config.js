@@ -62,5 +62,11 @@ module.exports = {
         outputPath: `src/@types/gatsby-types.d.ts`,
       },
     },
+    {
+      resolve: `gatsby-plugin-google-gtag`,
+      options: {
+        trackingIds: ["G-KEE2K7WXT7"],
+      },
+    },
   ],
 };
