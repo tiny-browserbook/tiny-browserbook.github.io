@@ -9,32 +9,36 @@ description: 本セクションでは、Web ブラウザを形作る基礎的な
 
 ## Web ブラウザの機能
 
-今あなたは本オンラインブックに Web ブラウザを使ってアクセスしているはずです。
+今あなたは本オンラインブックを Web ブラウザで閲覧しているはずです。
 そんなあなたのブラウザの中では、あなたの今見ている画面を描画するまでの間に、ほんとうに沢山の機能が利用されてきています。
 
 また、現代の Web ページの多くは動的なスクリプトを伴っており、Web ページ上でのあなたの操作に応じて動的に画面を変化させるようなものになっています。
-このような Web ページの動的性は、スクリプトを実行するためのエンジンを始めとした、多くの機能により支えられているものです。
+このような Web ページの動的性は、スクリプトを実行するためのエンジンを始めとした多くの機能により支えられているものです。
 
-そもそも、本オンラインブックにアクセスするまでの過程でも、あなたは Web ブラウザの何らかの機能を利用してきたはずです。
+そもそも、本オンラインブックに遷移してくるまでの過程でも、あなたは Web ブラウザの何らかの機能を利用してきたはずです。
 このページをブックマークに登録している方はブックマーク機能を使ったことでしょうし、一度このページを離脱した方は「戻る」「進む」ボタンを利用したことでしょう。
 [https://browserbook.shift-js.info](https://browserbook.shift-js.info) という URL を覚えていたので、アドレスバーを利用して本オンラインブックに遷移してきたという方もいるでしょうし、他の Web ページからのハイパーリンクをマウスでクリックすることでここまで来た方もいるでしょう。
-Web ページにアクセスする、という単純な行為一つのためにも、本当に多くの機能が存在しているのです。
+Web ページにアクセスする、という単純な行為一つのためにも多くの機能が存在しているのです。
 
 ここまで述べてきたように、Web ブラウザには多くの機能が備え付けられています。
-ここからは、それらの機能を、一旦以下のように大きく 3 つのグループに分類して考えてみることにします:
+ここからは、それらの機能を、一旦以下のように大きく 3 つのグループに分類することにします[^better_classification]:
 
-1. Web ページを表示するための機能
-2. Web ページの動的性のための機能
-3. Web ブラウジングのための機能
+1. **Web ページを表示するための機能**
+2. **Web ページの動的性のための機能**
+3. **Web ブラウジングのための機能**
 
 その上で、1 つめと 2 つめのグループをそれぞれもう少しだけ掘り下げ、それらの機能グループがどのような要素機能から実現されているかを整理することにします。
+
+[^better_classification]:
+    この辺に関しては、何らかの文献がよりよい分類を与えていたように記憶しているのですが、筆者がその文献がどこにあったかを忘れてしまいました。
+    よりよい分類方法をご存知の方がいればぜひご教示ください。
 
 ### Web ページを表示するための機能
 
 ある URL が指す Web ページを画面に表示する際、Web ブラウザは、URL で指定されたリソースを **Hyper-Text Transfer Protocol（HTTP）** 等のプロトコルを用いて取得します[^network_on_chromium]。
 その上で、リソースの種別を判定し、種別ごとに適当な処理を行います。
 
-いま、取得してきたリソースが HTML だった場合には、["Render-tree Construction, Layout, and Paint  |  Web Fundamentals"](https://developers.google.com/web/fundamentals/performance/critical-rendering-path/render-tree-construction) に書かれているような以下の過程を経て画面に描画されます:
+いま、取得してきたリソースが HTML ファイルだった場合には特に、["Render-tree Construction, Layout, and Paint  |  Web Fundamentals"](https://developers.google.com/web/fundamentals/performance/critical-rendering-path/render-tree-construction) に書かれているような以下の過程を経て画面に同 HTML ファイルが描画されます:
 
 1. HTML・CSS を処理して以下を構成する:
    - **Document Object Model（DOM）**[^note_on_dom]
@@ -44,15 +48,17 @@ Web ページにアクセスする、という単純な行為一つのために�
 4. レイアウト結果を画面に **ペイント（Paint）** [^paint] する。
 
 この過程の中でまずはじめに行われるのは Document Object Model（DOM）の生成と CSS Object Model（CSSOM）の用意です。
-ここで生成した DOM や CSSOM は、レンダリングツリーと呼ばれるブラウザ内部での中間表現に変換され、その後レイアウトという過程により、レンダリングツリー内の要素の画面内での配置が決定されます。
-レイアウトの結果は最終工程であるペイントの工程で画面に実際に描画されます。
+これはそれぞれ HTML 文字列と CSS 文字列に対して字句解析と構文解析を施すことにより構成されます。
+
+用意された DOM や CSSOM は、その後にレンダリングツリーと呼ばれるブラウザ内部での中間表現に変換されます。
+レンダリングツリー内の要素の画面内での位置はレイアウトという過程により決定され、レイアウトの結果は最終工程であるペイントの工程で画面に実際に描画されます。
 
 この過程を図示すると次の図の通りです:
 
 ![Web ページを表示するまでのフロー](./images/first-flow.png)
 
 もっとも、この過程は、ブラウザ実装によって若干内部的な呼び方が異なったり、更にこまかく分解されていたりするものです。
-より細かい実装に関しては以下を参照してください:
+各 Web ブラウザ実装における詳細については以下を参照してください:
 
 - Chromium: ["The Rendering Critical Path"](https://www.chromium.org/developers/the-rendering-critical-path) や ["Life of a pixel"](https://docs.google.com/presentation/d/1boPxbgNrTU0ddsc144rcXayGA_WF53k96imRH8Mp34Y/edit#slide=id.ga884fe665f_64_6)
 - Firefox: ["Design · servo/servo Wiki" の Task communication diagram](https://github.com/servo/servo/wiki/Design#task-communication-diagram)
@@ -64,20 +70,23 @@ Web ページにアクセスする、という単純な行為一つのために�
 
 ### Web ページの動的性のための機能
 
-多くの Web ページを動的なものたらしめている、Web ブラウザによる JavaScript の実行のために、多くのメジャーなブラウザ実装はそれ専用のエンジンを利用しています。例えば Chromium は [V8](https://v8.dev)、Firefox は [SpiderMonkey](https://spidermonkey.dev/) という JavaScript の実行エンジンを利用しています。
+多くの Web ページを動的なものたらしめている、Web ブラウザによる JavaScript の実行のために、多くのメジャーなブラウザ実装はそれ専用のエンジンを利用しています。
+例えば Chromium は [V8](https://v8.dev)、Firefox は [SpiderMonkey](https://spidermonkey.dev/) という JavaScript の実行エンジンを利用しています。
 
-もっとも、JavaScript が DOM を始めとした Web ページの情報と無関係に実行されるのでは意味がありません。JavaScript から DOM にアクセスできるなどの形で、当該 JavaScript コードが存在する Web ページの Web ブラウザ上での状態に JavaScript からアクセスできるからこそ Web ページの動的性が生まれるのです。
+もっとも、JavaScript が DOM を始めとした Web ページの情報と無関係に実行されるのでは意味がありません。
+JavaScript から DOM にアクセスできるなどの形で、当該 JavaScript コードがロードされた Web ページの Web ブラウザ上での状態に JavaScript からアクセスできるからこそ Web ページには動的性がもたらされるのです。
 また、`fetch()` などの関数により JavaScript からネットワーク通信を発生させたり、`alert()` などの関数により Web ブラウザの UI を操作したりできる、というのも現代の Web には欠かせない要素でしょう。
 
 このような JavaScript エンジンと Web ブラウザの連携のために、Web ブラウザは、JavaScript エンジンに対していくつかのインターフェイスを提供しています。
 DOM API や Fetch API がその例です。
 また、このようなインターフェイスの定義は **Web IDL** と呼ばれる言語で記述されます。JavaScript と Web ブラウザ側実装を繋げるコードは **バインディング（Binding）** などと呼ばれ、その一部は、Web IDL をもとに生成されています。
 
-> :muscle: 【演習: Web IDL に慣れ親しむ】
+> :muscle: **【演習: Web IDL に慣れ親しむ】**
 > Chromium で利用されているレンダリングエンジン Blink のソースツリーの [third_party/blink/renderer/core](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/third_party/blink/renderer/core/) や、Servo のソースツリーの [components/script/dom/webidls](https://github.com/servo/servo/tree/master/components/script/dom/webidls) を眺めて、さまざまなインターフェイスの `.idl` 定義を眺めてみましょう。Chromium のほうを眺める際には、["Web IDL interfaces - The Chromium Projects"](https://www.chromium.org/developers/web-idl-interfaces) が参考になるかと思います。
 
-もっとも、JavaScript の実行を許すとき、Web ページを画面に描画するための過程はより煩雑になることには注意しなくてはなりません。
-具体的には、以下に示した図が示すように、DOM を構成する最中に実行される JavaScript が新たな HTML のパース処理を引き起こすような形に変化します[^parsing_model]:
+もっとも、現代の Web ページに含まれているような JavaScript の実行を許そうとすると、Web ページを画面に描画するための過程はより煩雑になることには注意しなくてはなりません。
+これは DOM を構成する最中に実行される JavaScript が `document.write()` などにより新たな HTML のパース処理を引き起こしたり、DOM API を通して DOM を変更する可能性があるからです[^parsing_model]。
+このような要素を考慮したときの Web ページが画面に描画されるまでの流れを以下の図に示します。
 
 ![JavaScript を伴う Web ページの描画までの流れ](./images/second-flow.png)
 
