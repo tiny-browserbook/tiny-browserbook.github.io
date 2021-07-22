@@ -18,6 +18,7 @@
     "gatsby-plugin-sitemap": "^3.0.0",
     "gatsby-remark-emoji": "^0.0.3",
     "gatsby-remark-numbered-footnotes": "^1.0.1",
+    "prismjs": "^1.24.1",
     "prop-types": "^15.7.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",

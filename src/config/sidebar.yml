@@ -10,7 +10,7 @@
   items:
     - label: "前提を整理する"
       link: "/chapters/basic-concepts"
-    - label: "[WIP] HTML を取り扱う"
+    - label: "HTML を取り扱う"
       link: "/chapters/parsing-html"
     - label: "[WIP] CSS を取り扱う"
       link: "/chapters/parsing-css"
