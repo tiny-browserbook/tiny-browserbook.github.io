@@ -151,7 +151,7 @@ HTML Standard の ["Overview of the parsing model"](https://html.spec.whatwg.org
 </body>
 ```
 
-もしこの例のように、必ず開始タグ（e.g. `<p>`）と閉じタグ（e.g. `</p>`）が対応しているような HTML だけを取り扱えればよいとするならば、これから取り扱いたい言語の文法は以下の eBNF もどきにより定義できます:
+もしこの例のように、必ず開始タグ（e.g. `<p>`）と閉じタグ（e.g. `</p>`）が対応しているような HTML だけを取り扱えればよいとするならば、これから取り扱いたい言語の文法は以下の EBNF もどきにより定義できます:
 
 ```
 nodes := (node S*)*
@@ -178,8 +178,8 @@ sign = "[" | "]" | "." | "{" | "}" | ":" | ";" | "\\" | "`" | "'" | "(" | ")"
 S := " " | "\n"
 ```
 
-この節以降では、**このような eBNF から生成されるような文字列のみ** をパースする HTML 処理系を実装することにします。
-またこのような eBNF から生成されるものをパースするだけであれば、tokenization stage と tree construction stage を明確に分割する理由もほとんどありません。
+この節以降では、**このような EBNF から生成されるような文字列のみ** をパースする HTML 処理系を実装することにします。
+またこのような EBNF から生成されるものをパースするだけであれば、tokenization stage と tree construction stage を明確に分割する理由もほとんどありません。
 したがって、これから行う実装では、**この 2 つの手順をあまり明確に分けない** ことにしましょう。
 
 ## 実装
@@ -210,7 +210,7 @@ S := " " | "\n"
 git clone https://github.com/tiny-browserbook/exercise-html
 ```
 
-このテストが全て成功した頃には、先述の eBNF から生成されるような文字列は大体パースできる状態、すなわち HTML 文字列から DOM が生成できている状態になります。
+このテストが全て成功した頃には、先述の EBNF から生成されるような文字列は大体パースできる状態、すなわち HTML 文字列から DOM が生成できている状態になります。
 [演習用の環境を構築する](/chapters/setup) で Rust や puppy が実行できる環境が整っていれば、ダウンロードしてきた `exercise-html` ディレクトリ内で以下のようなコマンドを実行することで、事前に用意されているテストコードが実行できるはずです。
 まずは全てのテストが失敗していることを確認してください:
 
@@ -223,6 +223,10 @@ cargo test
 演習用実装では、`./src/dom.rs` において、パースしたものを格納する DOM の構造を以下のように定義しています[^rcdom]:
 
 ```rust
+use std::collections::HashMap;
+pub type AttrMap = HashMap<String, String>;
+
+#[derive(Debug, PartialEq)]
 pub struct Node {
     pub node_type: NodeType,
     pub children: Vec<Box<Node>>,
@@ -304,7 +308,7 @@ mod tests {
 }
 ```
 
-いま、先ほど定義した eBNF のうち、属性値に関する部分は以下の通りです:
+いま、先ほど定義した EBNF のうち、属性値に関する部分は以下の通りです:
 
 ```
 attribute := attribute_name S* "=" S* attribute_value
@@ -344,7 +348,7 @@ cargo test
 
 > **:muscle: 演習: 複数の属性値列を取り扱う**
 >
-> 先述の eBNF でいう `attributes := (attribute S*)*` に対応するようなパーサコンビネータ、つまり演習用実装中の以下のテストコードがパスするような `attributes()` 関数を定義してみましょう:
+> 先述の EBNF でいう `attributes := (attribute S*)*` に対応するようなパーサコンビネータ、つまり演習用実装中の以下のテストコードがパスするような `attributes()` 関数を定義してみましょう:
 >
 > ```rust
 > mod tests {
@@ -450,7 +454,7 @@ where
 
 ### 入れ子になったタグ文字列を取り扱う
 
-最後の仕事は eBNF の以下の項目に該当するような文字列処理を実装することです:
+最後の仕事は EBNF の以下の項目に該当するような文字列処理を実装することです:
 
 ```
 nodes := (node S*)*
