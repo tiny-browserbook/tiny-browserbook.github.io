@@ -12,7 +12,7 @@
       link: "/chapters/basic-concepts"
     - label: "HTML を取り扱う"
       link: "/chapters/parsing-html"
-    - label: "[WIP] CSS を取り扱う"
+    - label: "CSS を取り扱う"
       link: "/chapters/parsing-css"
     - label: "[WIP] レンダリングツリーを作る"
       link: "/chapters/building-rendering-tree"
