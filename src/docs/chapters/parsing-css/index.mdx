@@ -13,7 +13,7 @@ HTML を DOM ツリーに変換する処理が実装できたら、次は CSS �
 一方、CSS に関する Web 標準の多くは **W3C** という団体により管理されています。
 
 CSS に関する標準は、機能単位ごとに分割された形で管理されているのも特徴的です。
-たとえば CSS Fonts に関する仕様は ["CSS Fonts Module"](https://www.w3.org/TR/css-fonts-3/) で、CSS のセレクタ（後述）に関する仕様は ["Selectors"](https://www.w3.org/TR/selectors-3/) で管理されています。
+たとえば CSS Fonts に関する仕様は ["CSS Fonts Module"](https://www.w3.org/TR/css-fonts-3/) で、CSS のセレクタ（後述）に関する仕様は ["Selectors Level 3"](https://www.w3.org/TR/selectors-3/) などで管理されています。
 
 もっとも、このような運用には「どの仕様が現状で安定したものであるかが分かりにくい」「どのような仕様が存在しているのかが分かりにくい」といった課題があるのも事実です。
 そのため、近年は "CSS Snapshot 20XX" のような名称の文書が定期的に発行されており、この文書により CSS に関する Web 標準のうち一定安定しているものが一覧できるようになっています。
@@ -22,7 +22,7 @@ CSS に関する標準は、機能単位ごとに分割された形で管理さ�
 
 ## 基礎的な概念
 
-CSS のスタイルシートは複数の **ルール** からなります。
+CSS のスタイルシートは複数の **ルール（rule）** からなります。
 例えば次の CSS は、`@charset "utf-8"` のように `@` から始まる [at-rule](https://www.w3.org/TR/css-syntax-3/#at-rule) と呼ばれるルールと、それ以降の [qualified rule](https://www.w3.org/TR/css-syntax-3/#qualified-rule) ないしは [style rule](https://www.w3.org/TR/css-syntax-3/#style-rules) と呼ばれるルールから構成されています:
 
 ```css
@@ -62,9 +62,10 @@ type StyleRule = QualifiedRule;
 いま、[at-rule](https://www.w3.org/TR/css-syntax-3/#at-rule) は CSS そのものの振る舞いについてを規定する用途で用いられているルールです。
 具体的には `@charset ...` や `@import ...`、`@page ...` といったような指定が存在しています。
 
-一方、[style rule](https://www.w3.org/TR/css-syntax-3/#style-rules) は、およそ style rule は「どんな対象（とくにどんな HTML 要素）に、どんなスタイルを指定するか」を表現するルールです。
+一方、[style rule](https://www.w3.org/TR/css-syntax-3/#style-rules) は、およそ style rule は「どんな対象（とくにどんな HTML 要素）に、どんなスタイルを指定するか」を表現するルールです。`div { display: none; }` のような CSS 記述はこちらに該当します。
 
-もう少し [CSS Syntax Module Level 3](https://www.w3.org/TR/css-syntax-3) や [Selectors Level 3](https://www.w3.org/TR/selectors-3/) に従ってこれを細かく説明するならば、style rule は `*.warning > input[type="password"], *.warning > input[type="text"]` のような [**comma-separated list of selectors**](https://www.w3.org/TR/selectors-3/#grouping) と、`width: 100px` や `height: 32px;` のような **宣言（declaration）** と呼ばれるもののリスト（declaration list）からなります。
+後の実装に備えて、もう少し style rule の構造を [CSS Syntax Module Level 3](https://www.w3.org/TR/css-syntax-3) や [Selectors Level 3](https://www.w3.org/TR/selectors-3/) に従って細かく見ていきましょう。
+まず、style rule は `*.warning > input[type="password"], *.warning > input[type="text"]` のような [**comma-separated list of selectors**](https://www.w3.org/TR/selectors-3/#grouping) と、`width: 100px` や `height: 32px;` のような **宣言（declaration）** と呼ばれるもののリスト（declaration list）からなります。
 
 ```css
 <comma-separated list of selectors> {
@@ -74,7 +75,7 @@ type StyleRule = QualifiedRule;
 }
 ```
 
-いま、**comma-separated list of selectors** というものは、コンマ区切りの **selector** からなる列のことです。
+いま、**comma-separated list of selectors** というものは、コンマ区切りの **セレクタ（selector）** からなる列のことです。
 
 ```css
 <selector>, <selector>, ...  {
@@ -84,7 +85,7 @@ type StyleRule = QualifiedRule;
 }
 ```
 
-このセレクタ − は **combinator** により区切られた 1 つ以上の **sequence of simple selectors** からなるものです。
+このセレクターは **combinator** により区切られた 1 つ以上の **sequence of simple selectors** からなるものです。
 
 ```css
 <simple selector> <combinator> <simple selector>,
@@ -146,7 +147,7 @@ pub enum SimpleSelector {
 }
 ```
 
-> :memo: CSS Selectors Level 4
+> **:memo: CSS Selectors Level 4**
 >
 > CSS Selectors Level 3 ではセレクタをここまでで説明したように定義しています。
 > 一方、CSS Selectors Level 4 ではこれとはまた違った語の定義が行われていることに注意してください。
@@ -174,14 +175,17 @@ CSS Syntax Level 3 の [Tokenizing and Parsing CSS](https://drafts.csswg.org/css
 ## 本章での実装方針
 
 HTML より処理が簡単とはいえど、CSS Syntax Level 3 の通りに全てを実装するのは骨が折れる作業です。
-そこで本章では、以下のような CSS ルールを複数持つスタイルシートを表す文字列を処理することを目指します:
+そこで本章では、以下のようなスタイルシートを処理することを目指します:
 
-- 宣言内には [CSS Display Module Level 3](https://drafts.csswg.org/css-display/#the-display-properties) で定義されている `display` プロパティのみを持つ。
-- セレクタ部分には次のような種類のセレクタの（コンマ区切りの）列を持つ:
-  - [Universal Selector](https://www.w3.org/TR/selectors-3/#universal-selector)
-  - [Class Selector](https://www.w3.org/TR/selectors-3/#class-html)
-  - [Type Selector](https://www.w3.org/TR/selectors-3/#type-selectors)
-  - [Attribute Selector](https://www.w3.org/TR/selectors-3/#attribute-selectors)
+- 0 個以上の style rule を持つ。
+- 全ての style rule について、以下が成り立つ。
+    - comma-separated list of selectors の部分には combinator が含まれない。
+    - comma-separated list of selectors 内に含まれる simple selector は以下のうちどれかである。
+        - [Universal Selector](https://www.w3.org/TR/selectors-3/#universal-selector)
+        - [Class Selector](https://www.w3.org/TR/selectors-3/#class-html)
+        - [Type Selector](https://www.w3.org/TR/selectors-3/#type-selectors)
+        - [Attribute Selector](https://www.w3.org/TR/selectors-3/#attribute-selectors)
+    - declaration list の中には [CSS Display Module Level 3](https://drafts.csswg.org/css-display/#the-display-properties) で定義されている `display` プロパティのみを持つ。
 
 これらに対応すると、およそ、以下のような CSS が取り扱えるようになるはずです:
 
@@ -204,8 +208,7 @@ span[attr="test"] {
 }
 ```
 
-> 逆に、ここでは `>` や `*` などの [Combinator](https://www.w3.org/TR/selectors-3/#combinators) には対応しないことにします。
-> もしこれらのセレクタに対応する場合や、`font-size` のような子要素にまで影響が波及するようなプロパティを取り扱う必要が出てきた際には、["Constructing the Object Model | Web Fundamentals | Google Developers"](https://developers.google.com/web/fundamentals/performance/critical-rendering-path/constructing-the-object-model?hl=ja) で紹介されているような木構造を持ったデータ構造を新たに定義してやる必要があることでしょう。
+> もし combinator に対応する場合や、`font-size` のような子要素にまで影響が波及するようなプロパティを取り扱う必要が出てきた際には、["Constructing the Object Model | Web Fundamentals | Google Developers"](https://developers.google.com/web/fundamentals/performance/critical-rendering-path/constructing-the-object-model?hl=ja) で紹介されているような木構造を持ったデータ構造を新たに定義してやる必要があることでしょう。
 
 ## 実装
 
@@ -266,7 +269,6 @@ pub struct Rule {
 ///
 /// In the standard, *a selector* is *a chain* of one or more sequences of simple selectors separated by combinators,
 /// where a sequence of simple selectors is a chain of simple selectors that are not separated by a combinator.
-/// Hence `Selector` is in fact something like `Vec<Vec<SimpleSelector>>`.
 pub type Selector = SimpleSelector;
 
 /// `SimpleSelector` represents a simple selector defined in the following standard:
@@ -540,7 +542,7 @@ where
 
 実際にこのように `selectors()` 関数などの実装を修正すると、`test_selectors` と `test_simple_selector` というテストケースが成功するようになるはずです。これでセレクタも取り扱えるようになりました。
 
-### ルール（Rule）
+### ルール（rule）
 
 宣言とセレクタが処理できるようになったので、今度はルールを処理できるようにしましょう。
 以下のようなテストコードがパスするように `rule()` 関数の定義を修正してください：
