@@ -3,7 +3,7 @@ title: CSS を取り扱う
 description: この章では CSS に関する処理を実装します。
 ---
 
-HTML を DOM ツリーに変換する処理が実装できたら、次は CSS を取り扱う処理を実装しましょう。
+HTML を DOM ツリーに変換する処理が実装できたら、次は CSS から CSSOM を構成する処理を実装しましょう。
 
 ![この章で取り組むこと](./images/chapter-top.png)
 
@@ -161,7 +161,7 @@ CSS Syntax Level 3 の [Tokenizing and Parsing CSS](https://drafts.csswg.org/css
 
 1. バイト列をトークナイザ（tokernizer; 字句解析器）の入力に変換する
 2. **Tokenization stage**: 前の手順の出力をトークナイザでトークン列に変換する
-3. **Tree construction stage**: 前の手順の出力から `CSSStyleSheet` オブジェクトを構築する
+3. **Tree construction stage**: 前の手順の出力から [`CSSStyleSheet` オブジェクト](https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface) を構築する
 
 もっとも、HTML のパース処理と比べると、CSS のパース処理の難易度はそう高くありません。
 例外処理がそう多いわけでもなければ、後方互換性の維持のために設けられている歪な仕様も少ないためです。
@@ -185,7 +185,7 @@ HTML より処理が簡単とはいえど、CSS Syntax Level 3 の通りに全�
         - [Class Selector](https://www.w3.org/TR/selectors-3/#class-html)
         - [Type Selector](https://www.w3.org/TR/selectors-3/#type-selectors)
         - [Attribute Selector](https://www.w3.org/TR/selectors-3/#attribute-selectors)
-    - declaration list の中には [CSS Display Module Level 3](https://drafts.csswg.org/css-display/#the-display-properties) で定義されている `display` プロパティのみを持つ。
+    - declaration list の中には [CSS Display Module Level 3](https://drafts.csswg.org/css-display/#the-display-properties) で定義されている `display` プロパティのみを持ち、このプロパティの値としては `inline`、`none`、`block` のどれかのみを指定できる。
 
 このような制限を満たす CSS 処理系が実装できると、およそ、以下のような CSS が取り扱えるようになるはずです:
 
@@ -207,6 +207,9 @@ span[attr="test"] {
   display: inline;
 }
 ```
+
+また、このような制限の範囲であれば、CSS のルールを保持・適用する際にタグの間の親子関係を気にする必要もありません。
+したがって、単に CSS 文字列中に含まれていたルールの配列をこれから作る CSS 処理系の出力（CSSOM）としてやりましょう。
 
 > もし combinator に対応する場合や、`font-size` のような子要素にまで影響が波及するようなプロパティを取り扱う必要が出てきた際には、["Constructing the Object Model | Web Fundamentals | Google Developers"](https://developers.google.com/web/fundamentals/performance/critical-rendering-path/constructing-the-object-model?hl=ja) で紹介されているような木構造を持ったデータ構造を新たに定義してやる必要があることでしょう。
 
@@ -674,5 +677,5 @@ where
 
 ## ふりかえり
 
-本章では CSS の仕様について説明した後、そのパース処理を実装しました。
+本章では CSS の仕様について説明した後、CSS 文字列から CSSOM を構成する実装しました。
 前の章（["HTML を取り扱う"](/chapters/parsing-html)）のこの章の内容を合わせると、これでレンダリングツリーを構成するのに必要な処理が揃ったことになります。
