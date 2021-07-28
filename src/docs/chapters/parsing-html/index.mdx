@@ -8,15 +8,15 @@ Part 1 では次のような HTML をターミナル内で表示できる Web �
 ```html
 <body>
   <p>hello</p>
-  <div class="inlinediv">
-    <p>world</p>
-  </div>
-  <div class="none">
-    <p>this should not be shown</p>
-  </div>
+  <p class="inline">world</p>
+  <p class="inline">:)</p>
+  <div class="none"><p>this should not be shown</p></div>
   <style>
     .none {
       display: none;
+    }
+    .inline {
+      display: inline;
     }
   </style>
 </body>
@@ -137,15 +137,15 @@ HTML Standard の ["Overview of the parsing model"](https://html.spec.whatwg.org
 ```html
 <body>
   <p>hello</p>
-  <div class="inlinediv">
-    <p>world</p>
-  </div>
-  <div class="none">
-    <p>this should not be shown</p>
-  </div>
+  <p class="inline">world</p>
+  <p class="inline">:)</p>
+  <div class="none"><p>this should not be shown</p></div>
   <style>
     .none {
       display: none;
+    }
+    .inline {
+      display: inline;
     }
   </style>
 </body>
