@@ -16,7 +16,7 @@
       link: "/chapters/parsing-css"
     - label: "レンダリングツリーを作る"
       link: "/chapters/building-rendering-tree"
-    - label: "[WIP] レンダリングする"
+    - label: "レンダリングする"
       link: "/chapters/rendering"
 - label: "Part 2: 動的な Web に向けて"
   items:

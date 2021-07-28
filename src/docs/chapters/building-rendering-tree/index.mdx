@@ -128,7 +128,7 @@ git clone https://github.com/tiny-browserbook/exercise-rendering-tree
 ```
 
 ここからは、この演習用実装内の全てのテストが成功する状態を目指します:
-テストが全て成功する頃には、先述のような機能を持ったちいさな CSS 処理系が実装できているはずです。
+テストが全て成功する頃には、先述のような機能を持ったちいさな処理系が実装できているはずです。
 
 [演習用の環境を構築する](/chapters/setup) で Rust や puppy が実行できる環境が整っていれば、ダウンロードしてきた `exercise-rendering-tree` ディレクトリ内で以下のようなコマンドを実行することで、事前に用意されているテストコードが実行できます。
 まずは全てのテストが失敗していることを確認してください:
@@ -169,7 +169,7 @@ pub struct StyledNode<'a> {
 つまり、演習用実装中の `to_styled_node()` 関数に実装を与えることがこの章の最終地点です:
 
 ```rust
-fn to_styled_node<'a>(node: &'a Box<Node>, stylesheet: &Stylesheet) -> Option<StyledNode<'a>> {
+pub fn to_styled_node<'a>(node: &'a Box<Node>, stylesheet: &Stylesheet) -> Option<StyledNode<'a>> {
     todo!("you need to implement this");
 }
 ```
@@ -415,7 +415,7 @@ impl SimpleSelector {
 いざ演習用実装中の `to_styled_node` 関数に実装を与えてみてください:
 
 ```rust
-fn to_styled_node<'a>(node: &'a Box<Node>, stylesheet: &Stylesheet) -> Option<StyledNode<'a>> {
+pub fn to_styled_node<'a>(node: &'a Box<Node>, stylesheet: &Stylesheet) -> Option<StyledNode<'a>> {
     todo!("you need to implement this");
 }
 ```
@@ -423,7 +423,7 @@ fn to_styled_node<'a>(node: &'a Box<Node>, stylesheet: &Stylesheet) -> Option<St
 例えば、この関数の愚直な実装としては、以下のようなものが考えられます:
 
 ```rust
-fn to_styled_node<'a>(node: &'a Box<Node>, stylesheet: &Stylesheet) -> Option<StyledNode<'a>> {
+pub fn to_styled_node<'a>(node: &'a Box<Node>, stylesheet: &Stylesheet) -> Option<StyledNode<'a>> {
     let mut properties: HashMap<String, CSSValue> = [].iter().cloned().collect();
 
     // order of appearance のみを考慮した filtering & cascading

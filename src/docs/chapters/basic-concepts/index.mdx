@@ -113,8 +113,9 @@ Part 1 では、以下のような HTML をターミナル内で表示できる 
 ```html
 <body>
   <p>hello</p>
-  <div class="inlinediv">
-    <p>world</p>
+  <div class="inline">
+    <p>wor</p>
+    <p>ld</p>
   </div>
   <div class="none">
     <p>this should not be shown</p>
@@ -122,6 +123,9 @@ Part 1 では、以下のような HTML をターミナル内で表示できる 
   <style>
     .none {
       display: none;
+    }
+    .inline { 
+       display: inline;
     }
   </style>
 </body>
@@ -149,18 +153,22 @@ Part 2 では、Part 1 で作成した Web ブラウザをさらに拡張して�
 
 ```html
 <body>
-   <p>hello</p>
-   <div class="inlinediv">
-      <p>world</p>
-   </div>
-   <div class="none">
-      <p>this should not be shown</p>
-   </div>
-   <style>
-      .none {
-         display: none;
-      }
-   </style>
+  <p>hello</p>
+  <div class="inline">
+    <p>wor</p>
+    <p>ld</p>
+  </div>
+  <div class="none">
+    <p>this should not be shown</p>
+  </div>
+  <style>
+    .none {
+      display: none;
+    }
+    .inline { 
+       display: inline;
+    }
+  </style>
 
    <div id="result">
       <p>not clicked yet</p>
