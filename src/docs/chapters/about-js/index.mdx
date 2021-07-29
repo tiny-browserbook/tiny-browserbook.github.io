@@ -1,0 +1,40 @@
+---
+title: JavaScript と Web
+description: この章では Web における JavaScript の位置づけを再確認した後、Part 2 で取り組むことを整理します。
+---
+
+## Web ブラウザと JavaScript エンジン
+
+["前提を整理する"](/chapters/basic-concepts) でも言及したように、JavaScript は多くの Web ページを動的なものたらしめている偉大な存在です。いまの Web には JavaScript が欠かせません。
+
+ここで、このように Web において JavaScript が重宝されている背景には、**Web ブラウザ内の JavaScript の実行環境に対して Web ブラウザが様々な API を提供している** という事実があります。以下に示したいくつかの API の例のように、現代の Web ブラウザ上で JavaScript から利用できる API の力は強力であり、いまや Web ページ 1 つで本当に色々なことができてしまいます:
+
+- Fetch API や WebRTC API などの**ネットワーク通信**を行うための API
+- DOM API などの**Web ページの操作**のための API
+- Fullscreen API や History API といった**ブラウザの機能を制御**するための API
+- Web Workers API のような**バックグラウンド実行**のための API
+- WebGL のような高度な**グラフィック処理**のための API
+- File System API や MediaStream Image Capture API などの **デバイス操作**を行うための API
+
+## バインディング
+
+既存のメジャーな Web ブラウザ実装は、その実装が持つ JavaScript エンジンと Web ブラウザ実装を繋げる **バインディング（Binding）** を通して、JavaScript からこのような多岐にわたる機能を呼び出せるようにしています。このバインディングは多くの場合、JavaScript に露出される Web ブラウザの API インターフェイスを規定している **Web IDL** ファイルから自動生成されます。
+
+例えば V8 を JavaScript エンジンとして利用している Chromium（Blink）においては、[third_party/blink/renderer/bindings/IDLCompiler.md](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/third_party/blink/renderer/bindings/IDLCompiler.md) で説明されているような形で V8 向けのバインディングが生成されるようになっています。
+また、Web ブラウザが持つ API の実際の実装は [third_party/blink/renderer/core/](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/third_party/blink/renderer/core) や [third_party/blink/renderer/modules/](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/third_party/blink/renderer/modules) に存在しています。
+
+SpiderMonkey を JavaScript エンジンとしている Firefox（Servo）においても、[script/dom/bindings/codegen/](https://github.com/servo/servo/tree/master/components/script/dom/bindings/codegen) 以下の実装により Web IDL からの Rust コード生成が実現されているように見えます[^rough]。API の実際の実装は [components/script/dom](https://github.com/servo/servo/tree/master/components/script/dom) 以下に存在しています。
+
+[^rough]: 筆者はあまりこの挙動が理解できていないので少し表現をぼかしています。コードジェネレータ周りの実装を追うのは往々にして辛いものですね。
+
+## Part 2 で取り組むこと
+
+簡易的な JavaScript 処理系の再実装は面白いものです。
+しかし、Web ブラウザを作る過程で JavaScript 処理系の実装まで始めると、また Web ブラウザの完成が遠のいてしまいます。
+また、現代的な Web ブラウザが利用している JavaScript 処理系は相当複雑であり、JavaScript 処理系の再実装をしたとしても、["はじめに"](/intro) で本オンラインブックの意義として述べた "既存の Web ブラウザ実装を読む時の手がかり" という効果が得にくいのも事実です。
+
+そこで Part 2 では、Part 1 で作成した Web ブラウザに Chromium が採用している [V8](https://v8.dev) というエンジンを組み込むことによって JavaScript を実行することにします。
+V8 の組み込みは実はそれなりに大変ですが、これにより JavaScript 実行のために必要な実装コストが大幅に軽減されるはずですし、何よりこの組み込みの際に得た知識は現代 Web ブラウザのコードリーディングでも役立つことでしょう。
+
+また、その後は DOM API や Fetch API のような、現代の Web を支える API に近い何かを作成してみることにします。
+ここでは Part 1 までの Web ブラウザ実装（Rust コード） と C++ で書かれた V8 エンジンを繋げるバインディングを用意する必要があり、若干ややこしいことが増えますが、ここまでできれば大分 Web ブラウザらしい Web ブラウザになることでしょう。

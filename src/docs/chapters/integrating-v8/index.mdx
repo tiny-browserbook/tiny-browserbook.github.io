@@ -1,0 +1,420 @@
+---
+title: JavaScript エンジンを組み込む
+description: この章では Part 1 で作成した簡易 Web ブラウザに JavaScript エンジンを組み込みます。
+---
+
+["JavaScript と Web"](/chapters/about-js) で言及した通り、[V8](https://v8.dev/) は Google による JavaScript / WebAssembly の実行エンジンです。まずはこの V8 エンジンについて簡単に学んだ上で、[Part 1 で作った Web ブラウザ](https://github.com/tiny-browserbook/exercise-rendering) に JavaScript エンジンである V8 を組み込んでみましょう。
+
+## V8 の基礎的な概念
+
+V8 には _isolate_, _context_, _handle_, _handle scope_ といったコンセプトが存在します。
+これらはおよそ以下のようなものです:
+
+- _isolate_: V8 エンジンのインスタンス
+- _context_: isolate 内に複数存在しうる独立した実行環境
+- _handle_: V8 が持つオブジェクトへのポインタ
+- _handle scope_: handle を取りまとめるもの
+
+isolate は V8 エンジンのインスタンスです。V8 を利用する際には、適当な初期化処理の後、まずはこの isolate を作成してやることになります。
+
+context は isolate 内にさらに作成できる独立した JavaScript 実行環境です。
+同一 isolate 内の context は適切な _security token_ というものを伴えば干渉しあうことができますが、さもなくば原則干渉はできないため、無関係な複数の JavaScript を実行する際などに context の切り分けによる隔離が利用できます。
+
+handle は V8 が持つ JavaScript オブジェクトへのポインタです。
+handle は大抵 handle scope という複数の handle を束ねるものを用いて管理されます。
+これらは V8 を利用する側（C++ コードなど）が V8 内の JavaScript オブジェクトを操作したり、C++ コード側と連携しながら Garbage Collection を行ったりできるようにするために存在しています。
+
+> **:memo: Chromium での利用例**
+>
+> Chromium（Blink）では ["Design of V8 bindings"](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/third_party/blink/renderer/bindings/core/v8/V8BindingDesign.md) で述べられているような形で isolate や context を利用しています。
+> JavaScript が実行されうる箇所が拡張機能や Worker 等多岐にわたること、かつそれらの間の隔離をシビアに行う必要があることなどに起因して、isolate や context の用法は少し複雑になっていますが、現代 Web ブラウザにおける用例としては興味深いですね。
+
+> **:memo: V8 のその他の利用例**
+>
+> V8 エンジンは Web ブラウザ外でもしばしば用いられています。その最たる例が Node.js です。
+> その他の面白い利用例としては、サーバレスプラットフォームである [Cloudflare Workers](https://workers.cloudflare.com/) でのサーバレスアプリケーションの実行環境としての利用例や（[参考: "How Workers works"](https://developers.cloudflare.com/workers/learning/how-workers-works)）、クラウドネイティブな環境での用例が増えている [Envoy](https://www.envoyproxy.io/) での WebAssembly ランタイムとしての用例（[参考](https://www.envoyproxy.io/docs/envoy/latest/configuration/other_features/wasm)）があります。
+
+## 実装
+
+V8 を使ったちいさなソフトウェアを書きたい人に向けて、V8 は公式で ["Getting started with embedding V8"](https://v8.dev/docs/embed) という、C++ で V8 エンジンを使ったプログラムを書くためのガイドを公開しています。また [実際の小さなプログラムの例（hello-world.cc）](https://chromium.googlesource.com/v8/v8/+/branch-heads/6.8/samples/hello-world.cc) も公開されています。ここまでの Web ブラウザの実装では Rust を利用してきましたから、悲しいことに、このガイドはそのまま実践できません。
+
+しかし、Node.js と同じく JavaScript の処理系である [Deno](https://deno.land/) が Rust から V8 を利用するためにメンテナンスしているクレート [rusty_v8](https://github.com/denoland/rusty_v8) を利用すると、およそ ["Getting started with embedding V8"](https://v8.dev/docs/embed) や [hello-world.cc](https://chromium.googlesource.com/v8/v8/+/branch-heads/6.8/samples/hello-world.cc) に示されている手順と似たような手順で V8 を Rust から利用できます。
+ここからは実際にこのクレートを利用して、Part 1 で作成した Web ブラウザに V8 を組み込んでいきます。
+
+> **:memo: rusty_v8 の中身**
+>
+> rusty_v8 クレートのソースツリーの [src/](https://github.com/denoland/rusty_v8/tree/main/src) ディレクトリを見ると分かる通り、rusty_v8 クレート自体は大量の Foreign Functions Interface (FFI) 定義を行いつつ、そのラッパーを作成することにより V8 の Rust インターフェイスを構成しています。
+
+### 実装の準備
+
+まずは以下のコマンドにより Part 1 で作成した Web ブラウザに `src/runtime.rs` を足したものをダウンロードしてください:
+
+```sh
+git clone https://github.com/tiny-browserbook/exercise-js
+```
+
+### 実装の方針
+
+上記コマンドにより生成されたディレクトリ `exercise-js` の中で `cargo test` コマンドを実行すると、テストが 1 つ失敗するのが分かるはずです。これを修正するのがこれから取り組むことです。
+
+具体的には、以下のような `JavaScriptRuntime` 構造体を定義して、最終的にはその構造体の `execute()` メソッドに文字列を与えることで JavaScript が V8 上で実行できるようにしていきます:
+
+```rust
+pub struct JavaScriptRuntime {
+    /* ... */
+}
+
+impl JavaScriptRuntime {
+    pub fn new() -> Self {
+        /* ... */
+    }
+
+    pub fn execute(&mut self, filename: &str, source: &str) -> Result</* ... */> {
+        /* ... */
+    }
+}
+```
+
+### V8 の初期化
+
+[hello-world.cc](https://chromium.googlesource.com/v8/v8/+/branch-heads/6.8/samples/hello-world.cc) の冒頭では以下のようにして V8 を初期化しています:
+
+```cpp
+// Initialize V8.
+v8::V8::InitializeICUDefaultLocation(argv[0]);
+v8::V8::InitializeExternalStartupData(argv[0]);
+std::unique_ptr<v8::Platform> platform = v8::platform::NewDefaultPlatform();
+v8::V8::InitializePlatform(platform.get());
+v8::V8::Initialize();
+```
+
+これは `rusty_v8` クレートを用いると以下のように書くことが出来ます:
+
+```rust
+use rusty_v8 as v8;
+
+/* ... */
+
+static PUPPY_INIT: Once = Once::new();
+PUPPY_INIT.call_once(move || {
+    let platform = v8::new_default_platform().unwrap();
+    v8::V8::initialize_platform(platform);
+    v8::V8::initialize();
+});
+```
+
+まずは `JavaScriptRuntime` に対する `new()` の実装の先頭でこのような処理を行うようにしましょう。
+
+### Isolate の生成
+
+[hello-world.cc](https://chromium.googlesource.com/v8/v8/+/branch-heads/6.8/samples/hello-world.cc) では、以下のようにして V8 の isolate を生成しています:
+
+```cpp
+v8::Isolate::CreateParams create_params;
+create_params.array_buffer_allocator =
+    v8::ArrayBuffer::Allocator::NewDefaultAllocator();
+v8::Isolate* isolate = v8::Isolate::New(create_params);
+```
+
+これは `rusty_v8` クレートを用いると以下のように書けます:
+
+```rust
+use rusty_v8 as v8;
+
+/* ... */
+
+let mut isolate = v8::Isolate::new(v8::CreateParams::default());
+```
+
+`JavaScriptRuntime` に対する `new()` の実装における、V8 の初期化処理の後に、このような isolate の生成処理を追加しておきましょう。
+
+### Context の生成
+
+[hello-world.cc](https://chromium.googlesource.com/v8/v8/+/branch-heads/6.8/samples/hello-world.cc) では isolate の生成の後、以下のような形で context を生成しています:
+
+```cpp
+v8::Isolate::Scope isolate_scope(isolate);
+// Create a stack-allocated handle scope.
+v8::HandleScope handle_scope(isolate);
+// Create a new context.
+v8::Local<v8::Context> context = v8::Context::New(isolate);
+// Enter the context for compiling and running the hello world script.
+v8::Context::Scope context_scope(context);
+```
+
+これは `rusty_v8` クレートを用いると以下のように書けます:
+
+```rust
+use rusty_v8 as v8;
+
+/* ... */
+
+let context = {
+    let isolate_scope = &mut v8::HandleScope::new(&mut isolate);
+    let handle_scope = &mut v8::EscapableHandleScope::new(isolate_scope);
+    let context = v8::Context::new(handle_scope);
+    let context_scope = handle_scope.escape(context);
+    v8::Global::new(handle_scope, context_scope)
+};
+```
+
+これに関しても先項と同じく、`JavaScriptRuntime` に対する `new()` の実装における isolate の生成処理の後に、このような context の生成処理を追加しておきましょう。
+
+### `JavaScriptRuntime` の状態保持
+
+ここで生成した context は `JavaScriptRuntime` の `execute()` 関数の実装時に時折必要になるものです。
+そこで、[Deno の実装を参考](https://github.com/denoland/deno/blob/27e1b4cb5ac81c5ac2ca5adf78c91fdbef9409e8/core/runtime.rs#L135) に、 `JavaScriptRuntime` 関数の状態を表す以下のようなデータ構造を定義してやることにします:
+
+```rust
+pub struct JavaScriptRuntimeState {
+    pub context: v8::Global<v8::Context>,
+}
+```
+
+こうしたデータは V8 の _slot_ という場所に保存することができます。例えば以下のようにです:
+
+```rust
+use rusty_v8 as v8;
+
+/* ... */
+
+isolate.set_slot(Rc::new(RefCell::new(JavaScriptRuntimeState { context })));
+```
+
+`JavaScriptRuntimeState` を定義しつつ、`JavaScriptRuntime` の `new()` の実装における context の生成処理の後に、このような状態保存用の処理を追加しておきましょう。
+
+### `JavaScriptRuntime` の定義
+
+ここまでの手順により、以下のような `JavaScriptRuntime` 構造体や `JavaScriptRuntimeState` 構造体が定義されているはずです:
+
+```rust
+use crate::javascript::binding;
+use rusty_v8 as v8;
+use std::{cell::RefCell, rc::Rc, sync::Once};
+
+/// `JavaScriptRuntimeState` defines a state of JS runtime that will be stored per v8 isolate.
+pub struct JavaScriptRuntimeState {
+    pub context: v8::Global<v8::Context>,
+}
+
+/// `JavaScriptRuntime` defines a JS runtime with v8.
+/// It has a link to a V8 isolate, and the isolate includes `JavaScriptRuntimeState` in its *slot*.
+#[derive(Debug)]
+pub struct JavaScriptRuntime {
+    v8_isolate: v8::OwnedIsolate,
+}
+
+impl JavaScriptRuntime {
+    pub fn new() -> Self {
+        // init v8 platform just once
+        static PUPPY_INIT: Once = Once::new();
+        PUPPY_INIT.call_once(move || {
+            let platform = v8::new_default_platform().unwrap();
+            v8::V8::initialize_platform(platform);
+            v8::V8::initialize();
+        });
+
+        // create v8 isolate & context
+        let mut isolate = v8::Isolate::new(v8::CreateParams::default());
+        let context = {
+            let isolate_scope = &mut v8::HandleScope::new(&mut isolate);
+            let handle_scope = &mut v8::EscapableHandleScope::new(isolate_scope);
+            let context = v8::Context::new(handle_scope);
+            let context_scope = handle_scope.escape(context);
+            v8::Global::new(handle_scope, context_scope)
+        };
+
+        // store state inside v8 isolate
+        isolate.set_slot(Rc::new(RefCell::new(JavaScriptRuntimeState { context })));
+
+        JavaScriptRuntime {
+            v8_isolate: isolate,
+        }
+    }
+
+    /* ... */
+}
+```
+
+これで V8 の準備は終了です。
+
+### JavaScript の実行処理の実装
+
+[hello-world.cc](https://chromium.googlesource.com/v8/v8/+/branch-heads/6.8/samples/hello-world.cc) では以下のような形で V8 上で JavaScript を実行しています:
+
+```cpp
+// Create a string containing the JavaScript source code.
+v8::Local<v8::String> source =
+    v8::String::NewFromUtf8(isolate, "'Hello' + ', World!'",
+                            v8::NewStringType::kNormal)
+        .ToLocalChecked();
+// Compile the source code.
+v8::Local<v8::Script> script =
+    v8::Script::Compile(context, source).ToLocalChecked();
+// Run the script to get the result.
+v8::Local<v8::Value> result = script->Run(context).ToLocalChecked();
+// Convert the result to an UTF8 string and print it.
+v8::String::Utf8Value utf8(isolate, result);
+printf("%s\n", *utf8);
+```
+
+ここからも分かる通り、コードの実行のためには、先ほど作成した context の中で操作を行う必要があります。これを踏まえて、`JavaScriptRuntime` の `execute()` 関数の方も概ね同じような形で実装してみると、例えば以下のようになります:
+
+```rust
+impl JavaScriptRuntime {
+    /* ... */
+
+    /// `execute` runs a given source in the current context.
+    pub fn execute(&mut self, filename: &str, source: &str) -> Result<String, String> {
+        // `JavaScriptRuntimeState` から context handle scope を取り戻して開始
+        let scope = &mut self.get_handle_scope();
+
+        let source = v8::String::new(scope, source).unwrap();
+        let source_map = v8::undefined(scope);
+        let name = v8::String::new(scope, filename).unwrap();
+        let origin = v8::ScriptOrigin::new(
+            scope,
+            name.into(),
+            0,
+            0,
+            false,
+            0,
+            source_map.into(),
+            false,
+            false,
+            false,
+        );
+
+        let mut tc_scope = v8::TryCatch::new(scope);
+        let script = match v8::Script::compile(&mut tc_scope, source, Some(&origin)) {
+            Some(script) => script,
+            None => {
+                assert!(tc_scope.has_caught());
+                return Err(to_pretty_string(tc_scope));
+            }
+        };
+
+        match script.run(&mut tc_scope) {
+            Some(result) => Ok(result
+                .to_string(&mut tc_scope)
+                .unwrap()
+                .to_rust_string_lossy(&mut tc_scope)),
+            None => {
+                assert!(tc_scope.has_caught());
+                Err(to_pretty_string(tc_scope))
+            }
+        }
+    }
+}
+
+/// `JavaScriptRuntimeState` から状態を取り戻すための実装群
+impl JavaScriptRuntime {
+    /// `state` returns the runtime state stored in the given isolate.
+    pub fn state(isolate: &v8::Isolate) -> Rc<RefCell<JavaScriptRuntimeState>> {
+        let s = isolate
+            .get_slot::<Rc<RefCell<JavaScriptRuntimeState>>>()
+            .unwrap();
+        s.clone()
+    }
+
+    /// `get_state` returns the runtime state for the runtime.
+    pub fn get_state(&self) -> Rc<RefCell<JavaScriptRuntimeState>> {
+        Self::state(&self.v8_isolate)
+    }
+
+    /// `get_handle_scope` returns [a handle scope](https://v8docs.nodesource.com/node-0.8/d3/d95/classv8_1_1_handle_scope.html) for the runtime.
+    pub fn get_handle_scope(&mut self) -> v8::HandleScope {
+        let context = self.get_context();
+        v8::HandleScope::with_context(&mut self.v8_isolate, context)
+    }
+
+    /// `get_context` returns [a handle scope](https://v8docs.nodesource.com/node-0.8/df/d69/classv8_1_1_context.html) for the runtime.
+    pub fn get_context(&mut self) -> v8::Global<v8::Context> {
+        let state = self.get_state();
+        let state = state.borrow();
+        state.context.clone()
+    }
+}
+
+/// `to_pretty_string` formats the `TryCatch` instance into the prettified error string for puppy.
+///
+/// NOTE: See the following to get full error information.
+/// https://github.com/denoland/rusty_v8/blob/0d093a02f658781d52e6d70d138768fc19a79d54/examples/shell.rs#L158
+fn to_pretty_string(mut try_catch: v8::TryCatch<v8::HandleScope>) -> String {
+    // TODO (enhancement): better error handling needed! wanna remove uncareful unwrap().
+    let exception_string = try_catch
+        .exception()
+        .unwrap()
+        .to_string(&mut try_catch)
+        .unwrap()
+        .to_rust_string_lossy(&mut try_catch);
+    let message = try_catch.message().unwrap();
+
+    let filename = message
+        .get_script_resource_name(&mut try_catch)
+        .map_or_else(
+            || "(unknown)".into(),
+            |s| {
+                s.to_string(&mut try_catch)
+                    .unwrap()
+                    .to_rust_string_lossy(&mut try_catch)
+            },
+        );
+    let line_number = message.get_line_number(&mut try_catch).unwrap_or_default();
+    format!("{}:{}: {}", filename, line_number, exception_string)
+}
+```
+
+これで `JavaScriptRuntime` 構造体の準備ができました！
+
+## 挙動をテストする
+
+試しに `JavaScriptRuntime` 構造体を利用して JavaScript を実行するようなテストコードを書いてみましょう。例えば以下のようにです:
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_execute() {
+        let mut runtime = JavaScriptRuntime::new();
+        {
+            // a simple math
+            let r = runtime.execute("", "1 + 1");
+            assert!(r.is_ok());
+            assert_eq!(r.unwrap(), "2");
+        }
+        {
+            // simple string operation
+            let r = runtime.execute("", "'test' + \"func\" + `012${1+1+1}`");
+            assert!(r.is_ok());
+            assert_eq!(r.unwrap(), "testfunc0123");
+        }
+        {
+            // use of undefined variable
+            let r = runtime.execute("", "test");
+            assert!(r.is_err());
+        }
+        {
+            // lambda definition
+            let r = runtime.execute("", "let inc = (i) => { return i + 1 }; inc(1)");
+            assert!(r.is_ok());
+            assert_eq!(r.unwrap(), "2");
+        }
+        {
+            // variable reuse
+            let r = runtime.execute("", "inc(4)");
+            assert!(r.is_ok());
+            assert_eq!(r.unwrap(), "5");
+        }
+    }
+}
+```
+
+テストが用意できたら `cargo test` コマンドを実行して、正しく JavaScript が実行されるかを確認してみてください。
+無事全てのテストが成功すれば V8 を Web ブラウザに組み込むための最初のステップはクリアです。
+
+## ふりかえり
+
+本章では V8 の概要を整理した後、実際に `rusty_v8` クレートを用いて、V8 上で JavaScript を実行するための構造体 `JavaScriptRuntime` を定義しました。これで HTML 中の JavaScript を処理するための準備は整ったことになります。
