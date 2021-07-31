@@ -188,7 +188,6 @@ isolate.set_slot(Rc::new(RefCell::new(JavaScriptRuntimeState { context })));
 ここまでの手順により、以下のような `JavaScriptRuntime` 構造体や `JavaScriptRuntimeState` 構造体が定義されているはずです:
 
 ```rust
-use crate::javascript::binding;
 use rusty_v8 as v8;
 use std::{cell::RefCell, rc::Rc, sync::Once};
 

@@ -162,36 +162,23 @@ Part 2 では、Part 1 で作成した Web ブラウザをさらに拡張して�
     }
   </style>
 
-   <div id="result">
-      <p>not clicked yet</p>
-   </div>
-   <div>
-      <input type="submit" onclick="document.getElementById(`result`).innerHTML = `\x3cp\x3eclicked!\x3c/p\x3e`;"
-         value="click me"></input>
-   </div>
-   <div>
-        <input type="submit" onclick="window.alert(`hello world!`);" value="show alert"></input>
-   </div>
-   <script>
-      console.log('hello');
-   </script>
+  <div id="result">
+    <p>not loaded</p>
+  </div>
+  <script>
+    document.getElementById("result").innerHTML = `\x3cp\x3eloaded\x3c/p\x3e`;
+  </script>
 </body>
 ```
 
-この Web ページは、Part 1 で表示することを目標としたものに、更に以下を加えたものです:
+この Web ページは、Part 1 で表示することを目標としたものに、`<script>` タグによる DOM を操作するような JavaScript コード の実行を加えたものです。
 
-- `onclick` イベントハンドラによる以下のような JavaScript コードの実行
-  - DOM を操作するような JavaScript コード
-  - アラートダイアログを表示する（≒ UI に変更を加える）ような JavaScript コード
-- `<script>` タグによる JavaScript の実行
-
-Part 2 では、まず [「JavaScript の扱いを考える」](/chapters/about-js) において、JavaScript 実行のために必要なことを検討するところから始めます。
-その上で、[「V8 を組み込む」](/chapters/integrating-v8) において、Chromium も利用している JavaScript エンジンである [V8](https://v8.dev) と Part 1 で作成した Web ブラウザを接続することを試みます。
+Part 2 では、まず [「JavaScript と Web」](/chapters/about-js) において、JavaScript 実行のために必要なことを検討するところから始めます。
+その上で、[「JavaScript エンジンを組み込む」](/chapters/integrating-v8) において、Chromium も利用している JavaScript エンジンである [V8](https://v8.dev) と Part 1 で作成した Web ブラウザを接続することを試みます。
 とりわけこの時点ではリファレンス実装の `puppy::javascript::runtime` モジュール（[src/javascript/runtime.rs](https://github.com/lmt-swallow/puppy-browser/blob/b2d37ec2791bb3bfc44224a9d6c44b9a6ab73b0c/src/javascript/runtime.rs)）のサブセットを実装します。
 
-その後、[「イベントハンドラを捌く」](/chapters/handling-events) において、`onclick` イベントハンドラを処理するようなコードを追加します。
-また、[「ミニ DOM API を作る」](/chapters/building-dom-api) や [「ミニ Fetch API を作る」](/chapters/building-fetch-api) を通して、作成した Web ブラウザの機能を JavaScript に露出する
-なお、リファレンス実装においては、JavaScript バインディングの実装は `puppy::javascript::binding` モジュール（[src/javascript/binding.rs](https://github.com/lmt-swallow/puppy-browser/blob/b2d37ec2791bb3bfc44224a9d6c44b9a6ab73b0c/src/javascript/binding.rs)）や `puppy::javascript::api` モジュール（[src/javascript/api.rs](https://github.com/lmt-swallow/puppy-browser/blob/b2d37ec2791bb3bfc44224a9d6c44b9a6ab73b0c/src/javascript/api.rs)）に格納されています。
+その後、[「ミニ DOM API を作る」](/chapters/building-dom-api) や [「ミニ Fetch API を作る」](/chapters/building-fetch-api) を通して、作成した Web ブラウザの機能を JavaScript 側から利用できるようにします。
+なお、リファレンス実装において、JavaScript バインディングの実装は `puppy::javascript::binding` モジュール（[src/javascript/binding.rs](https://github.com/lmt-swallow/puppy-browser/blob/b2d37ec2791bb3bfc44224a9d6c44b9a6ab73b0c/src/javascript/binding.rs)）や `puppy::javascript::api` モジュール（[src/javascript/api.rs](https://github.com/lmt-swallow/puppy-browser/blob/b2d37ec2791bb3bfc44224a9d6c44b9a6ab73b0c/src/javascript/api.rs)）に格納されています。
 
 ## まとめ
 
