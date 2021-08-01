@@ -24,10 +24,8 @@
       link: "/chapters/about-js"
     - label: "JavaScript エンジンを組み込む"
       link: "/chapters/integrating-v8"
-    - label: "[WIP] ミニ DOM API を作る"
+    - label: "ミニ DOM API を作る"
       link: "/chapters/building-dom-api"
-    - label: "[WIP] ミニ Fetch API を作る"
-      link: "/chapters/building-fetch-api"
 - label: "Part 3: 安全な Web にむけて"
   items:
     - label: "[WIP] ブラウザとセキュリティ"
