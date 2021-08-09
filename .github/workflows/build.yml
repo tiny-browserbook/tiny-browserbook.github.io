@@ -21,10 +21,6 @@ jobs:
         run: yarn install
       - name: run build
         run: yarn build --prefix-paths
-      - name: Create a directory for distribution files
-        run: |
-          mkdir ./public/dist
-
       # publish it
       - name: Publish the site
         uses: peaceiris/actions-gh-pages@v3
