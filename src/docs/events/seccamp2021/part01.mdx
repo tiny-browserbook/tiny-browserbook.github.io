@@ -1,0 +1,44 @@
+---
+title: "Part 01: 防御者視点で考える Web ブラウザのセキュリティ"
+description: "N/A"
+---
+
+## 演習 01-01
+
+Fetch Standard について考える前に、まずは頭の体操から始めることにします。
+いま、以下の HTML からなる [この Web ページ](https://browserbook.shift-js.info/dist/fetch-example.html) を開くと、HTTP リクエストが 1 つ発行されるはずです:
+
+```html
+<script>
+  fetch("https://shift-js.info", { mode: "no-cors" });
+</script>
+```
+
+この HTML ファイルを参考に、開くとできるだけ沢山の方法で `https://shift-js.info` に対してリクエストを送るような HTML ファイルを作ってみてください。
+
+## 演習 01-02
+
+[Fetch Standard](https://fetch.spec.whatwg.org/) を読み、セキュリティのために大切そうに見える項目をできる限り列挙してみてください。また、可能な限り、それらの項目がない場合にどのようなリスクが発生しうるかを考えてみてください。
+
+## 演習 01-03
+
+Web Platform Tests の CORB 関連のテストの一覧は [web-platform-tests dashboard](https://wpt.fyi/results/) の [ここ](https://wpt.fyi/results/fetch/corb) から閲覧できます。
+
+そのうち `img-html-correctly-labeled.sub.html` というテストの各ブラウザでの実行結果は [ここ](https://wpt.fyi/results/fetch/corb/img-html-correctly-labeled.sub.html) から閲覧できます。このページの "Run in your browser on wpt.live" というリンクをクリックすると、実際にそのテストケースを自分の Web ブラウザ上で開いてみることもできます。
+
+1. 実際に `img-html-correctly-labeled.sub.html` というテストを自分の Web ブラウザ上で開き、CORB があなたの Web ブラウザ上でどのように動作しているかを確認してみてください。
+2. （余力があれば）確認できた動作が HTML Standard や Fetch Standard と整合しているかを可能な範囲で確認してみてください。
+   - ヒント: ["update the image data"](https://html.spec.whatwg.org/multipage/images.html#image-request) のステップの中で生成される ["request"](https://fetch.spec.whatwg.org/#concept-request) の ["mode"](https://fetch.spec.whatwg.org/#concept-request-mode) は何でしょうか？
+   - ヒント: ["CORB check"](https://fetch.spec.whatwg.org/#corb-check) は ["main fetch"](https://fetch.spec.whatwg.org/#concept-main-fetch) の中に登場しますが、"CORB check" が行われるのはどのようなときでしょうか？
+
+## 演習 01-04
+
+[web-platform-tests dashboard](https://wpt.fyi/results/) の [Fetch 関連のテスト](https://wpt.fyi/results/fetch) の項目から、Port Blocking に関する Web Platform Test 関するテスト項目を探してみましょう（ヒント: "bad port"）。
+
+## 演習 01-05
+
+Fetch Standard の ["Should response to request be blocked due to its MIME type?"](https://fetch.spec.whatwg.org/#should-response-to-request-be-blocked-due-to-mime-type?) はなぜ必要なのでしょうか？調査して
+みましょう。
+
+- ヒント: Fetch Standard のマスターは [ここ](https://github.com/whatwg/fetch/blob/main/fetch.bs) にあります。このファイルの各行の変更履歴を [blame](https://github.com/whatwg/fetch/blame/main/fetch.bs) などを駆使して調査してみましょう。
+- ヒント: [Fetch Standard の GitHub リポジトリ](https://github.com/whatwg/fetch) にアクセスし、"MIME type block" のようなワードで Issue を検索してみるとどうでしょうか。何かめぼしい Issue や Pull Request は見つかりませんか？

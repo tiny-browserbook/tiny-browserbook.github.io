@@ -30,7 +30,14 @@
   items:
     - label: "[WIP] ブラウザとセキュリティ"
       link: "/chapters/browser-security"
-
+- label: "セキュリティ・キャンプ全国大会2021 演習資料"
+  items:
+    - label: "Part 01"
+      link: "/events/seccamp2021/part01"
+    - label: "Part 02"
+      link: "/events/seccamp2021/part02"
+    - label: "Part 03"
+      link: "/events/seccamp2021/part03"
 - label: その他
   items:
     - label: "著者の Twitter"
