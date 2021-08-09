@@ -348,6 +348,8 @@ impl ToString for Node {
                 let attrs = e
                     .attributes
                     .iter()
+                    .clone()
+                    .into_iter()
                     .map(|(k, v)| {
                         // TODO (security): do this securely! This might causes mXSS.
                         format!("{}=\"{}\"", k, v)
@@ -357,12 +359,18 @@ impl ToString for Node {
                 let children = self
                     .children
                     .iter()
-                    .map(|node| node.inner_html())
+                    .clone()
+                    .into_iter()
+                    .map(|node| node.to_string())
                     .collect::<Vec<_>>()
                     .join("");
-                format!("<{} {}>{}</{}>", e.tag_name, attrs, children, e.tag_name)
+                if attrs != "" {
+                    format!("<{} {}>{}</{}>", e.tag_name, attrs, children, e.tag_name)
+                } else {
+                    format!("<{}>{}</{}>", e.tag_name, children, e.tag_name)
+                }
             }
-            NodeType::Text(ref t) => t.data.to_string(),
+            NodeType::Text(ref t) => t.data.clone(),
         }
     }
 }
