@@ -13,4 +13,7 @@
 <url> <loc>https://browserbook.shift-js.info/chapters/parsing-html</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://browserbook.shift-js.info/chapters/rendering</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://browserbook.shift-js.info/chapters/setup</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
+<url> <loc>https://browserbook.shift-js.info/events/seccamp2021/part01</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
+<url> <loc>https://browserbook.shift-js.info/events/seccamp2021/part02</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
+<url> <loc>https://browserbook.shift-js.info/events/seccamp2021/part03</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 </urlset>
